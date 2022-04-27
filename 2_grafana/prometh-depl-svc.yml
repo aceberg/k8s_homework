@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prom
+  template:
+    metadata:
+      labels:
+        app: prom
+    spec:
+      containers:
+        - name: prometh
+          image: prom/prometheus
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+          - mountPath: /etc/prometheus/prometheus.yml
+            name: volume
+      volumes:
+      - name: volume
+        hostPath:
+          path: /data/kube/prometheus.yml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometh
+spec:
+  type: ClusterIP
+  selector:
+    app: prom
+  ports:
+    - name: prometh
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
